@@ -40,6 +40,13 @@ const state = {
   query: ''
 };
 
+// Vendedores de ejemplo (en producción vienen del sistema de Premium)
+const VENDEDORES = [
+  { nombre:'Camila',    apellido:'Rojas',    fono:'+56 9 6123 4567', email:'camila.rojas@premiumbrands.cl' },
+  { nombre:'Matías',    apellido:'Fuentes',  fono:'+56 9 6234 5678', email:'matias.fuentes@premiumbrands.cl' },
+  { nombre:'Valentina', apellido:'Soto',     fono:'+56 9 6345 6789', email:'valentina.soto@premiumbrands.cl' }
+];
+
 /* ---------- utilidades ---------- */
 const CLP = new Intl.NumberFormat('es-CL', { style:'currency', currency:'CLP', maximumFractionDigits:0 });
 const money = n => CLP.format(Math.round(n));
@@ -166,8 +173,8 @@ function renderCart(){
   // Diferencia según tipo de cliente
   btn.textContent = state.isClient ? 'Confirmar pedido' : 'Ir a pagar';
   $('#cartNote').innerHTML = state.isClient
-    ? 'El pedido ingresa al WMS y Premium Brands se encarga del cobro y la factura. <em>(Simulado en esta demo.)</em>'
-    : 'Pagas en línea al confirmar el pedido. <em>(Simulado en esta demo.)</em>';
+    ? 'WMS · Premium Brands cobra y factura · despacho en 24 h. <em>(Simulado en esta demo.)</em>'
+    : 'Pago en línea · despacho en 24 h · se asigna un vendedor. <em>(Simulado en esta demo.)</em>';
   const pa = $('#payAmount'); if(pa) pa.textContent = money(sub);
 }
 
@@ -242,9 +249,22 @@ function completeOrder(paid){
   if(state.isClient){
     $('#okTitle').textContent = '¡Pedido recibido!';
     $('#okText').textContent = 'El pedido ingresa al WMS de Premium y Premium Brands emite la factura. Premium Brands se encargará del cobro y se emitirá la factura correspondiente.';
+    $('#okExtra').innerHTML = '<div class="ship">Tu pedido se enviará dentro de <strong>24 horas</strong>.</div>';
+    $('#okExtra').hidden = false;
   } else {
     $('#okTitle').textContent = '¡Pago aprobado!';
-    $('#okText').textContent = 'Tu pago fue aprobado. El pedido ingresa al WMS de Premium y Premium Brands emite el documento correspondiente.';
+    $('#okText').textContent = 'Tu pago fue aprobado y tu pedido quedó confirmado.';
+    const v = VENDEDORES[Math.floor(Math.random()*VENDEDORES.length)];
+    $('#okExtra').innerHTML =
+      '<div class="ship">Tu pedido se enviará dentro de <strong>24 horas</strong>.</div>' +
+      '<div class="seller">' +
+        '<div class="seller-h">Tu vendedor asignado</div>' +
+        '<div class="seller-name">' + v.nombre + ' ' + v.apellido + '</div>' +
+        '<div class="seller-row"><span>Teléfono</span>' + v.fono + '</div>' +
+        '<div class="seller-row"><span>Email</span>' + v.email + '</div>' +
+        '<div class="seller-note">Contacto de ejemplo para la demo.</div>' +
+      '</div>';
+    $('#okExtra').hidden = false;
   }
   state.cart = {}; persist(); renderGrid(); renderCart(); updateHeader();
   closePay(); closeCart();
