@@ -52,6 +52,7 @@ const CLP = new Intl.NumberFormat('es-CL', { style:'currency', currency:'CLP', m
 const money = n => CLP.format(Math.round(n));
 const roundTo = (n, step=10) => Math.round(n/step)*step;
 const $ = sel => document.querySelector(sel);
+const val = id => { const el = $('#'+id); return el ? el.value.trim() : ''; };
 
 function clientPrice(p){ return roundTo(p.price * (1 - CONFIG.clientDiscount)); }
 function unitPrice(p){ return state.isClient ? clientPrice(p) : p.price; }
@@ -68,6 +69,12 @@ function bottleSVG(cat){
 
 function persist(){ try{ localStorage.setItem('pb_cart', JSON.stringify(state.cart)); }catch(e){} }
 function restore(){ try{ const c = JSON.parse(localStorage.getItem('pb_cart')||'{}'); if(c && typeof c==='object') state.cart = c; }catch(e){} }
+
+/* almacenamiento compartido con el backoffice (admin.html) */
+function loadOrders(){ try{ return JSON.parse(localStorage.getItem('pb_orders')||'[]'); }catch(e){ return []; } }
+function saveOrders(a){ try{ localStorage.setItem('pb_orders', JSON.stringify(a)); }catch(e){} }
+function loadLeads(){ try{ return JSON.parse(localStorage.getItem('pb_leads')||'[]'); }catch(e){ return []; } }
+function saveLeads(a){ try{ localStorage.setItem('pb_leads', JSON.stringify(a)); }catch(e){} }
 
 /* ---------- carrito ---------- */
 function cartCount(){ return Object.values(state.cart).reduce((a,b)=>a+b,0); }
@@ -174,7 +181,7 @@ function renderCart(){
   btn.textContent = state.isClient ? 'Confirmar pedido' : 'Ir a pagar';
   $('#cartNote').innerHTML = state.isClient
     ? 'WMS · Premium Brands cobra y factura · despacho en 24 h. <em>(Simulado en esta demo.)</em>'
-    : 'Pago en línea · despacho en 24 h · se asigna un vendedor. <em>(Simulado en esta demo.)</em>';
+    : 'Pago en línea · despacho 24 h · el vendedor asignado envía la factura. <em>(Simulado en esta demo.)</em>';
   const pa = $('#payAmount'); if(pa) pa.textContent = money(sub);
 }
 
@@ -195,7 +202,7 @@ function updateHeader(){
   }
 }
 
-/* ---------- drawer / login / pago ---------- */
+/* ---------- drawer / modales ---------- */
 function openCart(){ closePay(); $('#cart').hidden=false; $('#overlay').hidden=false; }
 function closeCart(){ $('#cart').hidden=true; $('#overlay').hidden=true; }
 function openLogin(){ $('#loginError').hidden=true; $('#user').value=''; $('#pass').value=''; $('#loginModal').hidden=false; }
@@ -214,7 +221,7 @@ function logout(){ state.isClient=false; afterCartChange(); }
 /* ---------- pago (solo clientes NO registrados) ---------- */
 function openPay(){
   $('#payError').hidden = true;
-  ['payName','payCard','payExp','payCvv'].forEach(id=>{ const el=$('#'+id); if(el) el.value=''; });
+  ['bName','bRut','bRazon','bRutEmp','bFono','bEmail','payName','payCard','payExp','payCvv'].forEach(id=>{ const el=$('#'+id); if(el) el.value=''; });
   $('#payAmount').textContent = money(cartSubtotal());
   $('#cartTitle').textContent = 'Pago';
   $('#cartView').hidden = true;
@@ -227,7 +234,8 @@ function closePay(){
   const b = $('#paySubmit'); if(b){ b.disabled=false; b.innerHTML = 'Pagar <span id="payAmount">'+money(cartSubtotal())+'</span>'; }
 }
 function submitPay(){
-  const filled = ['payName','payCard','payExp','payCvv'].every(id=>{ const el=$('#'+id); return el && el.value.trim().length>0; });
+  const req = ['bName','bRut','bRazon','bRutEmp','bFono','bEmail','payName','payCard','payExp','payCvv'];
+  const filled = req.every(id=>{ const el=$('#'+id); return el && el.value.trim().length>0; });
   if(!filled){ $('#payError').hidden=false; return; }
   const b = $('#paySubmit');
   b.disabled = true; b.textContent = 'Procesando pago…';
@@ -244,19 +252,29 @@ function checkoutClick(){
 function completeOrder(paid){
   const total = cartSubtotal();
   const n = 'PB-' + new Date().getFullYear() + '-' + String(Math.floor(1000+Math.random()*8999));
+  const items = Object.entries(state.cart).map(([id,q])=>{ const p=PRODUCTS.find(x=>x.id===id); return {name:p.name, qty:q, price:unitPrice(p)}; });
   $('#orderNo').textContent = n;
   $('#orderTotal').textContent = money(total);
+
+  const order = { n, ts:Date.now(), tipo: state.isClient?'Registrado':'Público', total, items, estado:'Nuevo', vendedor:null, cliente:'', contacto:null };
+
   if(state.isClient){
+    order.cliente = state.clientName || 'Cliente registrado';
     $('#okTitle').textContent = '¡Pedido recibido!';
     $('#okText').textContent = 'El pedido ingresa al WMS de Premium y Premium Brands emite la factura. Premium Brands se encargará del cobro y se emitirá la factura correspondiente.';
     $('#okExtra').innerHTML = '<div class="ship">Tu pedido se enviará dentro de <strong>24 horas</strong>.</div>';
     $('#okExtra').hidden = false;
   } else {
+    const buyer = { nombre:val('bName'), rut:val('bRut'), razon:val('bRazon'), rutEmp:val('bRutEmp'), fono:val('bFono'), email:val('bEmail') };
+    const v = VENDEDORES[Math.floor(Math.random()*VENDEDORES.length)];
+    order.cliente = buyer.razon || buyer.nombre || 'Punto de venta';
+    order.vendedor = v.nombre + ' ' + v.apellido;
+    order.contacto = buyer;
     $('#okTitle').textContent = '¡Pago aprobado!';
     $('#okText').textContent = 'Tu pago fue aprobado y tu pedido quedó confirmado.';
-    const v = VENDEDORES[Math.floor(Math.random()*VENDEDORES.length)];
     $('#okExtra').innerHTML =
       '<div class="ship">Tu pedido se enviará dentro de <strong>24 horas</strong>.</div>' +
+      '<p class="ok-invoice">La factura será enviada por tu vendedor asignado.</p>' +
       '<div class="seller">' +
         '<div class="seller-h">Tu vendedor asignado</div>' +
         '<div class="seller-name">' + v.nombre + ' ' + v.apellido + '</div>' +
@@ -266,9 +284,30 @@ function completeOrder(paid){
       '</div>';
     $('#okExtra').hidden = false;
   }
+
+  const orders = loadOrders(); orders.push(order); saveOrders(orders);
+
   state.cart = {}; persist(); renderGrid(); renderCart(); updateHeader();
   closePay(); closeCart();
   $('#okModal').hidden = false;
+}
+
+/* ---------- registro (lead) ---------- */
+function openReg(){
+  $('#regError').hidden = true;
+  ['rName','rRut','rRazon','rRutEmp','rFono','rEmail'].forEach(id=>{ const el=$('#'+id); if(el) el.value=''; });
+  $('#regForm').hidden = false;
+  $('#regDone').hidden = true;
+  $('#regModal').hidden = false;
+}
+function closeReg(){ $('#regModal').hidden = true; }
+function submitReg(){
+  const ids = ['rName','rRut','rRazon','rRutEmp','rFono','rEmail'];
+  if(!ids.every(id=>val(id).length>0)){ $('#regError').hidden = false; return; }
+  const lead = { ts:Date.now(), nombre:val('rName'), rut:val('rRut'), razon:val('rRazon'), rutEmp:val('rRutEmp'), fono:val('rFono'), email:val('rEmail'), estado:'Nuevo' };
+  const leads = loadLeads(); leads.push(lead); saveLeads(leads);
+  $('#regForm').hidden = true;
+  $('#regDone').hidden = false;
 }
 
 /* ---------- eventos ---------- */
@@ -308,6 +347,12 @@ function bind(){
   $('#pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
   document.querySelectorAll('[data-close]').forEach(b=> b.addEventListener('click', closeLogin));
   $('#loginModal').addEventListener('click', e=>{ if(e.target.id==='loginModal') closeLogin(); });
+  // registro
+  $('#registerBtn').addEventListener('click', openReg);
+  $('#regSubmit').addEventListener('click', submitReg);
+  $('#regDoneClose').addEventListener('click', closeReg);
+  document.querySelectorAll('[data-close-reg]').forEach(b=> b.addEventListener('click', closeReg));
+  $('#regModal').addEventListener('click', e=>{ if(e.target.id==='regModal') closeReg(); });
   // checkout + pago
   $('#checkoutBtn').addEventListener('click', checkoutClick);
   $('#payBack').addEventListener('click', closePay);
@@ -315,7 +360,7 @@ function bind(){
   $('#okClose').addEventListener('click', ()=> $('#okModal').hidden=true);
   // escape
   document.addEventListener('keydown', e=>{
-    if(e.key==='Escape'){ closeCart(); closeLogin(); $('#okModal').hidden=true; }
+    if(e.key==='Escape'){ closeCart(); closeLogin(); closeReg(); $('#okModal').hidden=true; }
   });
 }
 
