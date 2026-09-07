@@ -70,18 +70,40 @@
   <div id="overlay" class="overlay" hidden></div>
   <aside id="cart" class="cart-drawer" aria-label="Carrito" hidden>
     <div class="cart-top">
-      <h2>Tu pedido</h2>
+      <h2 id="cartTitle">Tu pedido</h2>
       <button id="cartClose" class="icon-close" aria-label="Cerrar">×</button>
     </div>
-    <div id="cartItems" class="cart-items"></div>
-    <div class="cart-foot">
-      <div class="cart-row">
-        <span>Subtotal</span>
-        <strong id="cartSubtotal">$0</strong>
+
+    <!-- Vista carrito -->
+    <div id="cartView" class="cart-view">
+      <div id="cartItems" class="cart-items"></div>
+      <div class="cart-foot">
+        <div class="cart-row">
+          <span>Subtotal</span>
+          <strong id="cartSubtotal">$0</strong>
+        </div>
+        <div id="minHint" class="min-hint"></div>
+        <button id="checkoutBtn" class="btn-primary btn-block" disabled>Confirmar pedido</button>
+        <p id="cartNote" class="cart-note"></p>
       </div>
-      <div id="minHint" class="min-hint"></div>
-      <button id="checkoutBtn" class="btn-primary btn-block" disabled>Confirmar pedido</button>
-      <p class="cart-note">El pedido ingresa al WMS de Premium y se emite la factura. <em>(Simulado en esta demo.)</em></p>
+    </div>
+
+    <!-- Vista pago (cliente no registrado) -->
+    <div id="payView" class="cart-view" hidden>
+      <div class="pay-body">
+        <button id="payBack" class="pay-back">← Volver al carrito</button>
+        <h3 class="pay-title">Pago en línea</h3>
+        <p class="pay-sub">Ingresa los datos de tu tarjeta para completar la compra.</p>
+        <label class="field"><span>Nombre en la tarjeta</span><input id="payName" type="text" placeholder="Nombre Apellido" autocomplete="cc-name" /></label>
+        <label class="field"><span>Número de tarjeta</span><input id="payCard" type="text" inputmode="numeric" placeholder="4242 4242 4242 4242" autocomplete="cc-number" /></label>
+        <div class="pay-row">
+          <label class="field"><span>Vencimiento</span><input id="payExp" type="text" placeholder="MM/AA" autocomplete="cc-exp" /></label>
+          <label class="field"><span>CVV</span><input id="payCvv" type="text" inputmode="numeric" placeholder="123" autocomplete="cc-csc" /></label>
+        </div>
+        <p id="payError" class="login-error" hidden>Completa los datos de la tarjeta.</p>
+        <button id="paySubmit" class="btn-primary btn-block">Pagar <span id="payAmount">$0</span></button>
+        <p class="cart-note">Pago simulado — no se procesa ningún cobro real.</p>
+      </div>
     </div>
   </aside>
 
@@ -103,9 +125,9 @@
   <div id="okModal" class="modal" hidden>
     <div class="modal-card center">
       <div class="ok-badge" aria-hidden="true">✓</div>
-      <h2 class="modal-title">¡Pedido recibido!</h2>
+      <h2 class="modal-title" id="okTitle">¡Pedido recibido!</h2>
       <p class="modal-sub">Pedido <strong id="orderNo">PB-0000</strong> por <strong id="orderTotal">$0</strong>.</p>
-      <p class="ok-text">Ingresa a la bodega de Premium Brands (WMS) para su preparación y se emitirá la factura correspondiente.</p>
+      <p class="ok-text" id="okText">El pedido ingresa a la bodega de Premium Brands (WMS) y se emite la factura correspondiente.</p>
       <p class="ok-sim"><em>Demo — sin conexión real a WMS ni facturación.</em></p>
       <button id="okClose" class="btn-primary btn-block">Seguir comprando</button>
     </div>
