@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Premium Brands · eCommerce B2B (Demo)</title>
+  <meta name="description" content="Demo del canal de compra B2B para puntos de venta de Premium Brands." />
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-grotesk@400,500,600,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Cinta demo -->
+  <div class="demo-ribbon">DEMO · Prototipo — datos y precios de ejemplo, sin conexión real a WMS ni facturación</div>
+
+  <!-- Header -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#" aria-label="Premium Brands">
+        <span class="brand-word">Premium</span>
+        <span class="brand-star" aria-hidden="true"></span>
+        <span class="brand-word">Brands</span>
+      </a>
+
+      <div class="search" role="search">
+        <span class="search-ic" aria-hidden="true"></span>
+        <input id="search" type="text" placeholder="Buscar productos…" autocomplete="off" />
+      </div>
+
+      <div class="topbar-actions">
+        <span id="listBadge" class="list-badge list-public">Lista pública</span>
+        <button id="accountBtn" class="btn-ghost">Mi cuenta</button>
+        <button id="cartBtn" class="btn-cart" aria-label="Ver carrito">
+          <span class="cart-ic" aria-hidden="true"></span>
+          Carrito <span id="cartCount" class="cart-count">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Banner cliente -->
+  <div id="clientBanner" class="client-banner" hidden>
+    <span class="banner-star" aria-hidden="true"></span>
+    <span>Estás viendo <strong>precios y promociones exclusivas para clientes</strong>. Bienvenido de vuelta, <strong id="clientName">Cartera Premium</strong>.</span>
+  </div>
+
+  <!-- Contenido -->
+  <main class="wrap">
+    <div class="cat-head">
+      <div>
+        <h1 class="cat-title">Catálogo</h1>
+        <p class="cat-sub">Compra directa para puntos de venta · pedido mínimo de <strong id="minLabel">$100.000</strong> por compra.</p>
+      </div>
+      <div id="filters" class="filters"></div>
+    </div>
+
+    <section id="grid" class="grid" aria-live="polite"></section>
+    <p id="emptyState" class="empty" hidden>No encontramos productos con ese criterio.</p>
+  </main>
+
+  <footer class="foot">
+    <p><strong>Premium Brands · eCommerce B2B</strong> — prototipo de demostración.</p>
+    <p>Productos, precios y descuentos son de ejemplo. El acceso de cliente, el pago y la conexión con WMS/facturación están simulados para esta demo.</p>
+  </footer>
+
+  <!-- Carrito (drawer) -->
+  <div id="overlay" class="overlay" hidden></div>
+  <aside id="cart" class="cart-drawer" aria-label="Carrito" hidden>
+    <div class="cart-top">
+      <h2>Tu pedido</h2>
+      <button id="cartClose" class="icon-close" aria-label="Cerrar">×</button>
+    </div>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="cart-foot">
+      <div class="cart-row">
+        <span>Subtotal</span>
+        <strong id="cartSubtotal">$0</strong>
+      </div>
+      <div id="minHint" class="min-hint"></div>
+      <button id="checkoutBtn" class="btn-primary btn-block" disabled>Confirmar pedido</button>
+      <p class="cart-note">El pedido ingresa al WMS de Premium y se emite la factura. <em>(Simulado en esta demo.)</em></p>
+    </div>
+  </aside>
+
+  <!-- Login (modal) -->
+  <div id="loginModal" class="modal" hidden>
+    <div class="modal-card">
+      <button class="icon-close modal-close" data-close aria-label="Cerrar">×</button>
+      <h2 class="modal-title">Acceso de clientes</h2>
+      <p class="modal-sub">Ingresa con tu usuario para ver <strong>precios y promociones exclusivas</strong>.</p>
+      <label class="field"><span>Usuario</span><input id="user" type="text" placeholder="cliente" autocomplete="username" /></label>
+      <label class="field"><span>Contraseña</span><input id="pass" type="password" placeholder="••••••••" autocomplete="current-password" /></label>
+      <p id="loginError" class="login-error" hidden>Usuario o contraseña incorrectos.</p>
+      <button id="loginSubmit" class="btn-primary btn-block">Ingresar</button>
+      <p class="demo-cred">Demo · usuario <code>cliente</code> · contraseña <code>premium</code></p>
+    </div>
+  </div>
+
+  <!-- Confirmación (modal) -->
+  <div id="okModal" class="modal" hidden>
+    <div class="modal-card center">
+      <div class="ok-badge" aria-hidden="true">✓</div>
+      <h2 class="modal-title">¡Pedido recibido!</h2>
+      <p class="modal-sub">Pedido <strong id="orderNo">PB-0000</strong> por <strong id="orderTotal">$0</strong>.</p>
+      <p class="ok-text">Ingresa a la bodega de Premium Brands (WMS) para su preparación y se emitirá la factura correspondiente.</p>
+      <p class="ok-sim"><em>Demo — sin conexión real a WMS ni facturación.</em></p>
+      <button id="okClose" class="btn-primary btn-block">Seguir comprando</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
