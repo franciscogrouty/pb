@@ -32,6 +32,7 @@
 
       <div class="topbar-actions">
         <span id="listBadge" class="list-badge list-public">Lista pública</span>
+        <button id="registerBtn" class="btn-outline">Registrarse</button>
         <button id="accountBtn" class="btn-ghost">Mi cuenta</button>
         <button id="cartBtn" class="btn-cart" aria-label="Ver carrito">
           <span class="cart-ic" aria-hidden="true"></span>
@@ -92,15 +93,27 @@
     <div id="payView" class="cart-view" hidden>
       <div class="pay-body">
         <button id="payBack" class="pay-back">← Volver al carrito</button>
-        <h3 class="pay-title">Pago en línea</h3>
-        <p class="pay-sub">Ingresa los datos de tu tarjeta para completar la compra.</p>
+        <h3 class="pay-title">Datos y pago</h3>
+        <p class="pay-sub">Completa tus datos para la factura y realiza el pago.</p>
+
+        <div class="pay-section">Datos de facturación</div>
+        <label class="field"><span>Nombre y apellido</span><input id="bName" type="text" placeholder="Nombre Apellido" autocomplete="name" /></label>
+        <label class="field"><span>RUT</span><input id="bRut" type="text" placeholder="12.345.678-9" /></label>
+        <label class="field"><span>Razón social</span><input id="bRazon" type="text" placeholder="Comercial Los Andes SpA" autocomplete="organization" /></label>
+        <label class="field"><span>RUT empresa</span><input id="bRutEmp" type="text" placeholder="76.543.210-K" /></label>
+        <div class="pay-row">
+          <label class="field"><span>Teléfono</span><input id="bFono" type="text" inputmode="tel" placeholder="+56 9 1234 5678" autocomplete="tel" /></label>
+          <label class="field"><span>Email</span><input id="bEmail" type="email" placeholder="correo@negocio.cl" autocomplete="email" /></label>
+        </div>
+
+        <div class="pay-section pay-section-div">Pago</div>
         <label class="field"><span>Nombre en la tarjeta</span><input id="payName" type="text" placeholder="Nombre Apellido" autocomplete="cc-name" /></label>
         <label class="field"><span>Número de tarjeta</span><input id="payCard" type="text" inputmode="numeric" placeholder="4242 4242 4242 4242" autocomplete="cc-number" /></label>
         <div class="pay-row">
           <label class="field"><span>Vencimiento</span><input id="payExp" type="text" placeholder="MM/AA" autocomplete="cc-exp" /></label>
           <label class="field"><span>CVV</span><input id="payCvv" type="text" inputmode="numeric" placeholder="123" autocomplete="cc-csc" /></label>
         </div>
-        <p id="payError" class="login-error" hidden>Completa los datos de la tarjeta.</p>
+        <p id="payError" class="login-error" hidden>Completa todos los datos requeridos.</p>
         <button id="paySubmit" class="btn-primary btn-block">Pagar <span id="payAmount">$0</span></button>
         <p class="cart-note">Pago simulado — no se procesa ningún cobro real.</p>
       </div>
@@ -118,6 +131,34 @@
       <p id="loginError" class="login-error" hidden>Ingresa un usuario y una contraseña.</p>
       <button id="loginSubmit" class="btn-primary btn-block">Ingresar</button>
       <p class="demo-cred">Demo · ingresa cualquier usuario y contraseña para ver la lista de cliente.</p>
+    </div>
+  </div>
+
+  <!-- Registro (modal) -->
+  <div id="regModal" class="modal" hidden>
+    <div class="modal-card">
+      <button class="icon-close modal-close" data-close-reg aria-label="Cerrar">×</button>
+      <div id="regForm">
+        <h2 class="modal-title">Registro de punto de venta</h2>
+        <p class="modal-sub">Déjanos tus datos y un vendedor se pondrá en contacto.</p>
+        <label class="field"><span>Nombre y apellido</span><input id="rName" type="text" placeholder="Nombre Apellido" autocomplete="name" /></label>
+        <label class="field"><span>RUT</span><input id="rRut" type="text" placeholder="12.345.678-9" /></label>
+        <label class="field"><span>Razón social</span><input id="rRazon" type="text" placeholder="Comercial Los Andes SpA" autocomplete="organization" /></label>
+        <label class="field"><span>RUT empresa</span><input id="rRutEmp" type="text" placeholder="76.543.210-K" /></label>
+        <div class="pay-row">
+          <label class="field"><span>Teléfono</span><input id="rFono" type="text" inputmode="tel" placeholder="+56 9 1234 5678" autocomplete="tel" /></label>
+          <label class="field"><span>Email</span><input id="rEmail" type="email" placeholder="correo@negocio.cl" autocomplete="email" /></label>
+        </div>
+        <p id="regError" class="login-error" hidden>Completa todos los datos.</p>
+        <button id="regSubmit" class="btn-primary btn-block">Enviar registro</button>
+      </div>
+      <div id="regDone" class="reg-done" hidden>
+        <div class="ok-badge" aria-hidden="true">✓</div>
+        <h2 class="modal-title">¡Registro recibido!</h2>
+        <p class="ok-text">Un vendedor se pondrá en contacto contigo a la brevedad.</p>
+        <p class="ok-sim"><em>Demo — registro guardado localmente para el backoffice.</em></p>
+        <button id="regDoneClose" class="btn-primary btn-block">Cerrar</button>
+      </div>
     </div>
   </div>
 
