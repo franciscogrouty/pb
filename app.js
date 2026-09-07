@@ -162,6 +162,13 @@ function renderCart(){
     hint.className = 'min-hint ok';
     btn.disabled = false;
   }
+
+  // Diferencia según tipo de cliente
+  btn.textContent = state.isClient ? 'Confirmar pedido' : 'Ir a pagar';
+  $('#cartNote').innerHTML = state.isClient
+    ? 'El pedido ingresa al WMS y Premium Brands se encarga del cobro y la factura. <em>(Simulado en esta demo.)</em>'
+    : 'Pagas en línea al confirmar el pedido. <em>(Simulado en esta demo.)</em>';
+  const pa = $('#payAmount'); if(pa) pa.textContent = money(sub);
 }
 
 /* ---------- header / sesión ---------- */
@@ -181,8 +188,8 @@ function updateHeader(){
   }
 }
 
-/* ---------- drawer / modales ---------- */
-function openCart(){ $('#cart').hidden=false; $('#overlay').hidden=false; }
+/* ---------- drawer / login / pago ---------- */
+function openCart(){ closePay(); $('#cart').hidden=false; $('#overlay').hidden=false; }
 function closeCart(){ $('#cart').hidden=true; $('#overlay').hidden=true; }
 function openLogin(){ $('#loginError').hidden=true; $('#user').value=''; $('#pass').value=''; $('#loginModal').hidden=false; }
 function closeLogin(){ $('#loginModal').hidden=true; }
@@ -197,14 +204,50 @@ function doLogin(){
 }
 function logout(){ state.isClient=false; afterCartChange(); }
 
-function checkout(){
+/* ---------- pago (solo clientes NO registrados) ---------- */
+function openPay(){
+  $('#payError').hidden = true;
+  ['payName','payCard','payExp','payCvv'].forEach(id=>{ const el=$('#'+id); if(el) el.value=''; });
+  $('#payAmount').textContent = money(cartSubtotal());
+  $('#cartTitle').textContent = 'Pago';
+  $('#cartView').hidden = true;
+  $('#payView').hidden = false;
+}
+function closePay(){
+  $('#payView').hidden = true;
+  $('#cartView').hidden = false;
+  $('#cartTitle').textContent = 'Tu pedido';
+  const b = $('#paySubmit'); if(b){ b.disabled=false; b.innerHTML = 'Pagar <span id="payAmount">'+money(cartSubtotal())+'</span>'; }
+}
+function submitPay(){
+  const filled = ['payName','payCard','payExp','payCvv'].every(id=>{ const el=$('#'+id); return el && el.value.trim().length>0; });
+  if(!filled){ $('#payError').hidden=false; return; }
+  const b = $('#paySubmit');
+  b.disabled = true; b.textContent = 'Procesando pago…';
+  setTimeout(()=> completeOrder(true), 900);   // pago simulado
+}
+
+/* checkout: registrado = crédito directo; no registrado = pago web */
+function checkoutClick(){
+  if(cartSubtotal() < CONFIG.minTicket) return;
+  if(state.isClient) completeOrder(false);
+  else openPay();
+}
+
+function completeOrder(paid){
   const total = cartSubtotal();
-  if(total < CONFIG.minTicket) return;
   const n = 'PB-' + new Date().getFullYear() + '-' + String(Math.floor(1000+Math.random()*8999));
   $('#orderNo').textContent = n;
   $('#orderTotal').textContent = money(total);
+  if(state.isClient){
+    $('#okTitle').textContent = '¡Pedido recibido!';
+    $('#okText').textContent = 'El pedido ingresa al WMS de Premium y Premium Brands emite la factura. Premium Brands se encargará del cobro y se emitirá la factura correspondiente.';
+  } else {
+    $('#okTitle').textContent = '¡Pago aprobado!';
+    $('#okText').textContent = 'Tu pago fue aprobado. El pedido ingresa al WMS de Premium y Premium Brands emite el documento correspondiente.';
+  }
   state.cart = {}; persist(); renderGrid(); renderCart(); updateHeader();
-  closeCart();
+  closePay(); closeCart();
   $('#okModal').hidden = false;
 }
 
@@ -245,8 +288,10 @@ function bind(){
   $('#pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
   document.querySelectorAll('[data-close]').forEach(b=> b.addEventListener('click', closeLogin));
   $('#loginModal').addEventListener('click', e=>{ if(e.target.id==='loginModal') closeLogin(); });
-  // checkout
-  $('#checkoutBtn').addEventListener('click', checkout);
+  // checkout + pago
+  $('#checkoutBtn').addEventListener('click', checkoutClick);
+  $('#payBack').addEventListener('click', closePay);
+  $('#paySubmit').addEventListener('click', submitPay);
   $('#okClose').addEventListener('click', ()=> $('#okModal').hidden=true);
   // escape
   document.addEventListener('keydown', e=>{
