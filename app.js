@@ -47,6 +47,51 @@ const VENDEDORES = [
   { nombre:'Valentina', apellido:'Soto',     fono:'+56 9 6345 6789', email:'valentina.soto@premiumbrands.cl' }
 ];
 
+// Banners del carrusel (cambian según lista pública / cliente)
+const BANNERS = {
+  public: [
+    { bg:'282323', kicker:'Únete', title:'Regístrate y accede a precios exclusivos', sub:'Listas y promociones especiales para puntos de venta.', cta:{ label:'Registrarse', action:'register' } },
+    { bg:'3E281B', kicker:'Portafolio', title:'Conoce nuestras marcas premium', sub:'Vinos, espumantes y destilados seleccionados.', cta:{ label:'Ver catálogo', action:'cat:Todos' } },
+    { bg:'645A4E', kicker:'Logística', title:'Despacho en 24 horas', sub:'Tu pedido llega rápido a tu punto de venta.' },
+    { bg:'5E3A3A', kicker:'Compra directa', title:'Pedidos desde $100.000', sub:'Compra cuando quieras, sin depender de la visita.' }
+  ],
+  client: [
+    { bg:'282323', kicker:'Exclusivo clientes', title:'−15% en todo el catálogo', sub:'Precios preferentes aplicados a tu cuenta.', cta:{ label:'Ver ofertas', action:'cat:Todos' } },
+    { bg:'5E3A3A', kicker:'Novedades', title:'Nuevas marcas este mes', sub:'Suma novedades a tu vitrina.', cta:{ label:'Ver vinos', action:'cat:Vinos' } },
+    { bg:'645A4E', kicker:'Promo', title:'Espumantes para el fin de semana', sub:'Reponer stock nunca fue tan fácil.', cta:{ label:'Ver espumantes', action:'cat:Espumantes' } },
+    { bg:'3E281B', kicker:'Acompañamiento', title:'Tu vendedor, siempre disponible', sub:'Gestiona tus pedidos con respaldo.' }
+  ]
+};
+let bannerMode = null, bannerTimer = null, bannerIdx = 0;
+
+function renderBanners(){
+  const mode = state.isClient ? 'client' : 'public';
+  if(mode === bannerMode) return;   // no reiniciar si no cambió
+  bannerMode = mode; bannerIdx = 0;
+  const list = BANNERS[mode];
+  const car = $('#carousel');
+  car.innerHTML =
+    '<div class="carousel-track">' + list.map((b,i)=>
+      `<div class="slide ${i===0?'active':''}" style="background:#${b.bg}">
+        <div class="slide-kicker">${b.kicker}</div>
+        <div class="slide-title">${b.title}</div>
+        <div class="slide-sub">${b.sub}</div>
+        ${b.cta ? `<button class="slide-cta" data-action="${b.cta.action}">${b.cta.label}</button>` : ''}
+      </div>`).join('') + '</div>' +
+    '<div class="dots">' + list.map((_,i)=>`<button class="dot ${i===0?'active':''}" data-dot="${i}" aria-label="Banner ${i+1}"></button>`).join('') + '</div>';
+  car.hidden = false;
+  if(bannerTimer) clearInterval(bannerTimer);
+  bannerTimer = setInterval(()=> goBanner(bannerIdx+1), 4500);
+}
+function goBanner(i){
+  const car = $('#carousel');
+  const slides = car.querySelectorAll('.slide'), dots = car.querySelectorAll('.dot');
+  if(!slides.length) return;
+  bannerIdx = (i + slides.length) % slides.length;
+  slides.forEach((s,k)=> s.classList.toggle('active', k===bannerIdx));
+  dots.forEach((d,k)=> d.classList.toggle('active', k===bannerIdx));
+}
+
 /* ---------- utilidades ---------- */
 const CLP = new Intl.NumberFormat('es-CL', { style:'currency', currency:'CLP', maximumFractionDigits:0 });
 const money = n => CLP.format(Math.round(n));
@@ -200,6 +245,7 @@ function updateHeader(){
     acc.textContent = 'Mi cuenta';
     $('#clientBanner').hidden = true;
   }
+  renderBanners();
 }
 
 /* ---------- drawer / modales ---------- */
@@ -353,6 +399,22 @@ function bind(){
   $('#regDoneClose').addEventListener('click', closeReg);
   document.querySelectorAll('[data-close-reg]').forEach(b=> b.addEventListener('click', closeReg));
   $('#regModal').addEventListener('click', e=>{ if(e.target.id==='regModal') closeReg(); });
+  // carrusel
+  $('#carousel').addEventListener('click', e=>{
+    const dot = e.target.closest('[data-dot]');
+    if(dot){ goBanner(+dot.dataset.dot); return; }
+    const cta = e.target.closest('[data-action]');
+    if(cta){
+      const a = cta.dataset.action;
+      if(a === 'register'){ openReg(); }
+      else if(a.indexOf('cat:') === 0){
+        state.category = a.slice(4);
+        renderFilters(); renderGrid();
+        const head = document.querySelector('.cat-head');
+        if(head && head.scrollIntoView) head.scrollIntoView({ behavior:'smooth' });
+      }
+    }
+  });
   // checkout + pago
   $('#checkoutBtn').addEventListener('click', checkoutClick);
   $('#payBack').addEventListener('click', closePay);
