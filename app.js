@@ -35,6 +35,7 @@ const PRODUCTS = [
 const state = {
   cart: {},          // { id: qty }
   isClient: false,
+  clientName: '',
   category: 'Todos',
   query: ''
 };
@@ -171,6 +172,7 @@ function updateHeader(){
   if(state.isClient){
     badge.textContent = 'Lista cliente'; badge.className = 'list-badge list-client';
     acc.textContent = 'Cerrar sesión';
+    $('#clientName').textContent = state.clientName || 'Cartera Premium';
     $('#clientBanner').hidden = false;
   } else {
     badge.textContent = 'Lista pública'; badge.className = 'list-badge list-public';
@@ -186,14 +188,12 @@ function openLogin(){ $('#loginError').hidden=true; $('#user').value=''; $('#pas
 function closeLogin(){ $('#loginModal').hidden=true; }
 
 function doLogin(){
-  const u = $('#user').value.trim().toLowerCase();
+  const u = $('#user').value.trim();
   const p = $('#pass').value;
-  if(u===CONFIG.demoUser && p===CONFIG.demoPass){
-    state.isClient = true;
-    closeLogin(); afterCartChange();
-  } else {
-    $('#loginError').hidden = false;
-  }
+  if(!u || !p){ $('#loginError').hidden = false; return; }  // solo pedimos que no estén vacíos
+  state.isClient = true;
+  state.clientName = u;
+  closeLogin(); afterCartChange();
 }
 function logout(){ state.isClient=false; afterCartChange(); }
 
