@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Premium Brands · Backoffice (Demo)</title>
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-grotesk@400,500,600,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="demo-ribbon">BACKOFFICE · Demo interna — datos guardados localmente en este navegador</div>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html" aria-label="Premium Brands">
+        <span class="brand-word">Premium</span>
+        <span class="brand-star" aria-hidden="true"></span>
+        <span class="brand-word">Brands</span>
+      </a>
+      <span class="admin-badgeword">Backoffice</span>
+      <div class="topbar-actions">
+        <a class="btn-outline" href="index.html">Ver tienda</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="admin-bar">
+      <button id="seedBtn" class="btn-mini">Cargar datos de ejemplo</button>
+      <button id="fakeBtn" class="btn-mini ghost">+ Pedido de ejemplo</button>
+      <button id="clearBtn" class="btn-mini danger">Vaciar todo</button>
+    </div>
+
+    <div id="stats" class="admin-stats"></div>
+
+    <h2 class="admin-h">Pedidos</h2>
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead><tr>
+          <th>N°</th><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Productos</th>
+          <th>Total</th><th>Vendedor</th><th>Estado</th><th></th>
+        </tr></thead>
+        <tbody id="ordersBody"></tbody>
+      </table>
+    </div>
+
+    <h2 class="admin-h">Registros (leads)</h2>
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead><tr>
+          <th>Fecha</th><th>Nombre</th><th>Razón social</th><th>RUT empresa</th>
+          <th>Teléfono</th><th>Email</th><th>Estado</th><th></th>
+        </tr></thead>
+        <tbody id="leadsBody"></tbody>
+      </table>
+    </div>
+
+    <p class="foot" style="border:0;padding-left:0">Backoffice de demostración. Los datos se guardan localmente (localStorage) en este navegador; en producción vendrían del sistema real de Premium Brands.</p>
+  </main>
+
+  <script src="admin.js"></script>
+</body>
+</html>
